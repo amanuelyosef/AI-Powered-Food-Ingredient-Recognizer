@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Food Ingredient Recognizer</string>
+
+    <string name="GEMINI_BASE_URL">https://generativelanguage.googleapis.com/</string>
+    <string name="GEMINI_API_KEY">XXXXX</string>
+    <string name="GEMINI_MODEL">gemini-2.5-flash</string>
+    <string name="GEMINI_FALLBACK_MODELS">gemini-2.5-flash-lite,gemini-1.5-flash</string>
+    <string name="GEMINI_IMAGE_MIME_TYPE">image/jpeg</string>
+    <string name="GEMINI_INGREDIENT_PROMPT">Identify the food in this image, then return only ingredients as strict JSON in this format: {&quot;ingredients&quot;:[{&quot;ingredient&quot;:&quot;name&quot;,&quot;confidence&quot;:0.0}]}. Use confidence values between 0 and 1. No markdown and no extra text.</string>
+</resources>
