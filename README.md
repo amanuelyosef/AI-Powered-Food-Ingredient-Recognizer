@@ -96,7 +96,7 @@ If you want to contribute to the UI, API integration, or the upcoming ML feature
 5. Open a Pull Request.
 
 ## 📝 License
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the Apache License. See `LICENSE` for more information.
 
 
 ---
