@@ -2,7 +2,7 @@
     <string name="app_name">Food Ingredient Recognizer</string>
 
     <string name="GEMINI_BASE_URL">https://generativelanguage.googleapis.com/</string>
-    <string name="GEMINI_API_KEY">AIzaSyBA-N20n-NPPp6rwrPelTEpZxtMi8BhwfQ</string>
+    <string name="GEMINI_API_KEY">XXXX</string>
     <string name="GEMINI_MODEL">gemini-2.5-flash</string>
     <string name="GEMINI_FALLBACK_MODELS">gemini-2.5-flash-lite,gemini-1.5-flash</string>
     <string name="GEMINI_IMAGE_MIME_TYPE">image/jpeg</string>
