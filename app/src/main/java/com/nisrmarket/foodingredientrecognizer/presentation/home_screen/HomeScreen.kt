@@ -1,5 +1,8 @@
 package com.nisrmarket.foodingredientrecognizer.presentation.home_screen
 
+import android.content.Context
+import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.ImageSearch
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +40,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,11 +50,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import java.io.File
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,12 +66,26 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
 
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             viewModel.onImageSelected(uri)
+        },
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { captured ->
+            if (captured) {
+                viewModel.onImageSelected(pendingCameraUri)
+            } else {
+                Toast.makeText(context, "Photo capture cancelled.", Toast.LENGTH_SHORT).show()
+            }
+            pendingCameraUri = null
         },
     )
 
@@ -160,7 +184,33 @@ fun HomeScreen(
             ) {
                 Icon(Icons.Default.AddPhotoAlternate, contentDescription = "Pick Image")
                 Spacer(Modifier.width(8.dp))
-                Text("Pick Food Photo", fontSize = MaterialTheme.typography.titleMedium.fontSize)
+                Text("Choose from Gallery", fontSize = MaterialTheme.typography.titleMedium.fontSize)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    val cameraUri = runCatching { createCameraImageUri(context) }.getOrNull()
+                    if (cameraUri == null) {
+                        Toast.makeText(context, "Unable to open camera.", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    pendingCameraUri = cameraUri
+                    cameraLauncher.launch(cameraUri)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = Color.Black
+                )
+            ) {
+                Icon(Icons.Default.PhotoCamera, contentDescription = "Take Photo")
+                Spacer(Modifier.width(8.dp))
+                Text("Take Photo")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -275,4 +325,10 @@ fun HomeScreen(
             }
         }
     }
+}
+
+private fun createCameraImageUri(context: Context): Uri {
+    val imageDir = File(context.cacheDir, "captured_images").apply { mkdirs() }
+    val imageFile = File.createTempFile("food_capture_", ".jpg", imageDir)
+    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
 }
